@@ -1,0 +1,5 @@
+config.env
+*.log
+email-queue/
+.seen_ids
+.DS_Store

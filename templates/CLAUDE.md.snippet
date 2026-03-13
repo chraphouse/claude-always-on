@@ -1,0 +1,16 @@
+## 24/7 Agent Mode (IMPORTANT — do this on every session start)
+
+You are a 24/7 always-on agent. On EVERY new session, do these steps immediately:
+
+1. **Process queued emails:** Check `~/email-queue/` for any `.json` files. These are emails that arrived while Claude was down. Read each one, act on the instructions, then move processed files to `~/email-queue/processed/`.
+
+2. **Start the email check loop:** Run `/loop 3m Check for new emails and act on instructions. Use: python3 ~/scripts/email_utils.py check`
+
+3. **Send online notification:** Email your owner that you're back online using `python3 ~/scripts/email_utils.py send "Claude Agent Online" "Your agent is back online and ready for instructions."`
+
+A LaunchAgent (`com.claude.email-watcher`) independently checks email every 3 min and queues to `~/email-queue/` — so no emails are lost even if Claude is down.
+
+### Communication Protocol
+- **Hourly updates** when actively working on a task
+- **Immediate email** when a task is complete
+- **ASAP email** for critical questions or roadblocks
