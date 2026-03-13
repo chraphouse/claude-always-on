@@ -142,6 +142,76 @@ To attach to the running session:
 tmux attach -t claude
 ```
 
+## macOS Permissions (Manual Steps)
+
+The installer automates everything it can, but macOS **requires manual approval** for certain privacy permissions. These cannot be scripted — Apple blocks it by design.
+
+### Required: Grant These in System Settings
+
+Open **System Settings → Privacy & Security** and enable the following:
+
+#### 1. Accessibility
+**Path:** Privacy & Security → Accessibility
+
+Toggle **ON** for:
+- Terminal
+- (Also iTerm2 or Warp if you use those)
+
+**Why:** Claude uses `osascript` and AppleScript to send keystrokes and control apps. Without this, automation commands will silently fail.
+
+#### 2. Full Disk Access
+**Path:** Privacy & Security → Full Disk Access
+
+Toggle **ON** for:
+- Terminal
+
+**Why:** Claude needs to read and write files anywhere on the system. Without this, some directories (like `~/Desktop`, `~/Documents`, `~/Downloads`) may be inaccessible.
+
+#### 3. Automation
+**Path:** Privacy & Security → Automation
+
+Allow Terminal to control:
+- System Events
+- Google Chrome (if using browser automation)
+- Any other apps Claude should control
+
+**Why:** AppleScript-based automation (controlling Chrome, sending keystrokes) requires explicit per-app approval.
+
+### How to Know If Permissions Are Missing
+
+If Claude reports errors like:
+- `"Not authorized to send Apple events"` → Accessibility or Automation permission missing
+- `"Operation not permitted"` on file reads → Full Disk Access missing
+- `osascript` commands failing silently → Accessibility not granted
+
+### Tip: Trigger the Prompts
+
+macOS will often show a permission prompt **the first time** an app tries to use a restricted feature. You can trigger these by running Claude once and having it attempt:
+```bash
+# Triggers Accessibility prompt
+osascript -e 'tell application "System Events" to keystroke "test"'
+
+# Triggers Automation prompt for Chrome
+osascript -e 'tell application "Google Chrome" to get URL of active tab of front window'
+```
+
+Click **"Allow"** when the prompts appear, then verify in System Settings.
+
+### What the Installer Handles Automatically
+
+These are set up for you when you choose "Harden macOS" during install:
+
+| Setting | Command |
+|---------|---------|
+| Disable sleep | `pmset -a sleep 0 displaysleep 0 disksleep 0` |
+| Auto-restart on power failure | `pmset -a autorestart 1` |
+| Wake on LAN | `pmset -a womp 1` |
+| Passwordless sudo | `/etc/sudoers.d/<username>` |
+| Clear app quarantine flags | `xattr -rd com.apple.quarantine` |
+| Enable Screen Sharing/VNC | Load screensharing LaunchDaemon |
+| Disable auto macOS updates | SoftwareUpdate preferences |
+| Terminal in Login Items | Added via osascript |
+
 ## Troubleshooting
 
 ### Email watcher not running

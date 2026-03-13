@@ -249,7 +249,7 @@ fi
 # 7. macOS hardening (optional)
 # ----------------------------------------------------------
 echo ""
-read -p "Harden macOS for always-on operation? (disable sleep, auto-restart on power failure) (y/n): " HARDEN
+read -p "Harden macOS for always-on operation? (disable sleep, auto-restart, passwordless sudo, etc.) (y/n): " HARDEN
 
 if [ "$HARDEN" = "y" ]; then
     echo "  Disabling sleep..."
@@ -260,10 +260,76 @@ if [ "$HARDEN" = "y" ]; then
 
     echo "  Enabling Wake on LAN..."
     sudo pmset -a womp 1 2>/dev/null || echo "  Warning: Could not enable WoL (need sudo)"
+
+    # Passwordless sudo
+    CURRENT_USER="$(whoami)"
+    SUDOERS_FILE="/etc/sudoers.d/$CURRENT_USER"
+    if [ ! -f "$SUDOERS_FILE" ]; then
+        echo "  Setting up passwordless sudo for $CURRENT_USER..."
+        echo "$CURRENT_USER ALL=(ALL) NOPASSWD: ALL" | sudo tee "$SUDOERS_FILE" >/dev/null 2>/dev/null \
+            && sudo chmod 0440 "$SUDOERS_FILE" \
+            && echo "  Passwordless sudo enabled." \
+            || echo "  Warning: Could not set up passwordless sudo."
+    else
+        echo "  Passwordless sudo already configured."
+    fi
+
+    # Clear quarantine on installed apps
+    echo "  Clearing quarantine flags on /Applications..."
+    sudo xattr -rd com.apple.quarantine /Applications/*.app 2>/dev/null || true
+
+    # Enable Screen Sharing (VNC)
+    echo "  Enabling Screen Sharing..."
+    sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.screensharing.plist 2>/dev/null \
+        && echo "  Screen Sharing enabled." \
+        || echo "  Warning: Could not enable Screen Sharing."
+
+    # Disable auto macOS updates
+    echo "  Disabling automatic macOS updates..."
+    sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload -bool false 2>/dev/null || true
+    sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false 2>/dev/null || true
+    sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall -bool false 2>/dev/null || true
+    echo "  Auto-updates disabled."
+
+    # Add Terminal to Login Items
+    echo "  Adding Terminal to Login Items..."
+    osascript -e 'tell application "System Events" to make login item at end with properties {path:"/System/Applications/Utilities/Terminal.app", hidden:false}' 2>/dev/null \
+        && echo "  Terminal added to Login Items." \
+        || echo "  Warning: Could not add Terminal to Login Items."
 fi
 
 # ----------------------------------------------------------
-# 8. Done
+# 8. Manual steps (CANNOT be automated)
+# ----------------------------------------------------------
+echo ""
+echo "============================================"
+echo "  MANUAL STEPS REQUIRED"
+echo "============================================"
+echo ""
+echo "macOS requires you to manually grant these permissions"
+echo "in System Settings. These CANNOT be automated."
+echo ""
+echo "Open: System Settings → Privacy & Security"
+echo ""
+echo "  1. ACCESSIBILITY (required for keystrokes/automation)"
+echo "     → Privacy & Security → Accessibility"
+echo "     → Toggle ON: Terminal (and iTerm2/Warp if used)"
+echo ""
+echo "  2. FULL DISK ACCESS (required for reading all files)"
+echo "     → Privacy & Security → Full Disk Access"
+echo "     → Toggle ON: Terminal (and iTerm2/Warp if used)"
+echo ""
+echo "  3. AUTOMATION (required for AppleScript control)"
+echo "     → Privacy & Security → Automation"
+echo "     → Allow Terminal to control: System Events, Chrome, etc."
+echo ""
+echo "  Tip: These prompts may appear automatically the first"
+echo "  time Claude tries to use these features. Click 'Allow'."
+echo ""
+read -p "Press Enter once you've granted these permissions (or skip for now)..."
+
+# ----------------------------------------------------------
+# 9. Done
 # ----------------------------------------------------------
 echo ""
 echo "============================================"
@@ -278,8 +344,9 @@ echo ""
 echo "Next steps:"
 echo "  1. Start Claude:  claude --dangerously-skip-permissions"
 echo "     (or reboot — it auto-starts in tmux)"
-echo "  2. Send an email to $AGENT_EMAIL from $PERSONAL_EMAIL"
+echo "  2. Send an email to ${AGENT_EMAIL:-your agent email} from ${PERSONAL_EMAIL:-your email}"
 echo "  3. Claude will read it and email you back!"
 echo ""
+echo "If you haven't already, grant the manual permissions above."
 echo "To uninstall:  ./uninstall.sh"
 echo ""
