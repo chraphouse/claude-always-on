@@ -2,6 +2,23 @@
 
 Turn your Mac into a 24/7 Claude agent that you control via email. Send it tasks from your phone, get results back automatically.
 
+> **IMPORTANT: Security Warning**
+>
+> This project runs Claude with `--dangerously-skip-permissions`, giving it **full, unsupervised access** to the machine — file system, shell, network, installed apps, everything. **Do NOT run this on a machine with personal accounts, sensitive data, or production credentials.**
+>
+> **You MUST use a dedicated, isolated machine:**
+> - A Mac Mini / old laptop with a **fresh macOS install and a dummy user account**
+> - A **virtual machine** (UTM, Parallels, VMware)
+> - A **cloud Mac** (AWS EC2 Mac, MacStadium)
+>
+> **Do NOT run this on:**
+> - Your daily driver laptop
+> - A machine signed into your personal iCloud, 1Password, banking, etc.
+> - A machine with SSH keys that have access to production servers
+> - Any machine where an autonomous agent could cause real damage
+>
+> Think of this machine as a **sandboxed worker** — it should have only what the agent needs and nothing you'd regret it accessing.
+
 ## What It Does
 
 - Checks your email every 3 minutes for instructions
@@ -132,6 +149,24 @@ The system is designed to never lose an email:
 - **Claude session dies?** tmux LaunchAgent restarts it, queued emails are processed on startup
 - **Network blip?** Watcher retries on next 3-min cycle, emails stay unread until fetched
 - **Power outage?** macOS auto-restart on power failure + everything above
+
+## Security
+
+**Read [docs/SECURITY.md](docs/SECURITY.md) before deploying.** Key points:
+
+- Use a **dedicated machine** with a fresh macOS install and dummy account
+- Never run on a machine with personal iCloud, banking, password managers, or production credentials
+- Use a **dedicated email account** for the agent (not your personal email)
+- If giving the agent spending access, use **prepaid/virtual cards with low limits**
+- To kill the agent instantly: `tmux kill-session -t claude`
+
+## Documentation
+
+- [Setup Guide](docs/SETUP_GUIDE.md) — Step-by-step installation
+- [Architecture](docs/ARCHITECTURE.md) — System design & data flow
+- [Security](docs/SECURITY.md) — Isolation requirements & best practices
+- [FAQ](docs/FAQ.md) — Common questions & troubleshooting
+- [Contributing](docs/CONTRIBUTING.md) — How to contribute
 
 ## License
 

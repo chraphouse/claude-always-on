@@ -14,6 +14,32 @@ echo "============================================"
 echo "  Claude Always-On Agent — Setup"
 echo "============================================"
 echo ""
+echo "╔══════════════════════════════════════════════════════════╗"
+echo "║                   SECURITY WARNING                       ║"
+echo "║                                                          ║"
+echo "║  This gives Claude FULL, UNSUPERVISED access to this    ║"
+echo "║  machine (filesystem, shell, network, everything).       ║"
+echo "║                                                          ║"
+echo "║  ONLY run this on a DEDICATED, ISOLATED machine:        ║"
+echo "║   - Mac with fresh install + dummy account               ║"
+echo "║   - Virtual machine (UTM, Parallels, VMware)            ║"
+echo "║   - Cloud Mac (AWS, MacStadium)                          ║"
+echo "║                                                          ║"
+echo "║  Do NOT run on your personal computer or any machine     ║"
+echo "║  with personal accounts, sensitive data, or production   ║"
+echo "║  credentials.                                            ║"
+echo "║                                                          ║"
+echo "║  See docs/SECURITY.md for full details.                  ║"
+echo "╚══════════════════════════════════════════════════════════╝"
+echo ""
+read -p "Is this a dedicated/isolated machine? (yes/no): " DEDICATED
+if [ "$DEDICATED" != "yes" ]; then
+    echo ""
+    echo "Please set up a dedicated machine first. See docs/SECURITY.md"
+    echo "and docs/SETUP_GUIDE.md for guidance."
+    exit 1
+fi
+echo ""
 
 # ----------------------------------------------------------
 # 1. Check prerequisites

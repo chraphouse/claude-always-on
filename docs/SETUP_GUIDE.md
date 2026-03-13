@@ -2,7 +2,20 @@
 
 Step-by-step instructions for setting up Claude Always-On Agent on your Mac.
 
+> **Before you start:** Read [SECURITY.md](./SECURITY.md). This project must run on a **dedicated, isolated machine** — not your personal computer. Use a Mac Mini with a fresh install and dummy account, a VM, or a cloud Mac. See the security guide for full details.
+
 ## Prerequisites
+
+### 0. Prepare a Dedicated Machine
+
+This is the most important step. You need a machine that:
+- Has a **fresh macOS install** with a **dummy user account**
+- Is **NOT signed into** your personal iCloud, email, or any sensitive accounts
+- Has **no SSH keys** to production servers
+- Has **no password managers** with real credentials
+
+Good options: spare Mac Mini, UTM/Parallels VM, AWS EC2 Mac, MacStadium.
+
 
 ### 1. Install Claude Code CLI
 
